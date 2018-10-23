@@ -54,12 +54,10 @@ df <- fromJSON("http://idigbio.github.io/idb-us-collections/collections.json")
 #only collections with data
 df <- df %>% filter(recordsetQuery!="")
 for (i in seq_along(df$collection_uuid)){
-  if(nrow(as.data.frame(fromJSON(df$recordsetQuery[i])))>1 &length(fromJSON(df$recordsetQuery[i],simplifyVector = list()))>1 & !grepl(pattern = "a6e02b78-6fc6-4cb6-bb87-8d5a443f2c2a|271a9ce9-c6d3-4b63-a722-cb0adc48863f|9d8ced48-62c5-4ce0-99e7-a03550c674c0|b000920c-6f7d-49d3-9d0f-2bb630d2e01a|042dbdba-a449-4291-8777-577a5a4045de|9dce915b-3de4-4a7d-a68d-e4c4c15809ce|5386d272-06c6-4027-b5d5-d588c2afe5e5",x = df$recordsetQuery[i])){
+  if(nrow(as.data.frame(fromJSON(df$recordsetQuery[i])))>1 &length(fromJSON(df$recordsetQuery[i],simplifyVector = list()))>1 & !class(fromJSON(df$recordsetQuery[i]))=="list"){
     countVector <- c()
     for(ii in 1:length(fromJSON(df$recordsetQuery[i],simplifyVector = list()))){
-      rqCount <- fromJSON(paste0("http://search.idigbio.org/v2/search/records?rq=",URLencode(
-        substr(toJSON(fromJSON(df$recordsetQuery[i])[ii,]),2,nchar(toJSON(fromJSON(df$recordsetQuery[i])[ii,]))-1)
-      )))$itemCount
+      rqCount <- idig_count_records(rq=fromJSON(df$recordsetQuery[i],simplifyVector = list())[[ii]])
       countVector <- c(countVector,rqCount)
     }
     df$count[i] <- sum(countVector)
